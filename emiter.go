@@ -10,6 +10,7 @@ type Message struct {
 	Body            string
 	Group           string
 	DeduplicaitonId string
+	Attributes      map[string]string
 }
 
 type Emitter struct {
@@ -37,6 +38,20 @@ func (e *Emitter) Put(message *Message) {
 
 	if message.Group != "" {
 		sendParams.MessageGroupId = aws.String(message.Group)
+	}
+	
+	if len(message.Attributes) > 0 {
+		var attributes map[string]&sqs.MessageAttributeValue{}
+		
+		for key, value := range message.Attributes {
+			attribute := &sqs.MessageAttributeValue{}
+			attribute.SetDataType("String")
+			attribute.SetStringValue(value)
+
+			attributes[key] = attribute
+		}
+		
+		sendParams.MessageAttributes = attributes
 	}
 
 	_, err := e.Client.SendMessage(sendParams)
