@@ -1,9 +1,10 @@
 package sqs_emitter
 
 import (
+	"log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	s "github.com/aws/aws-sdk-go/service/sqs"
-	"log"
 )
 
 type Message struct {
@@ -39,18 +40,18 @@ func (e *Emitter) Put(message *Message) {
 	if message.Group != "" {
 		sendParams.MessageGroupId = aws.String(message.Group)
 	}
-	
+
 	if len(message.Attributes) > 0 {
-		var attributes map[string]&sqs.MessageAttributeValue{}
-		
+		var attributes map[string]*s.MessageAttributeValue
+
 		for key, value := range message.Attributes {
-			attribute := &sqs.MessageAttributeValue{}
+			attribute := &s.MessageAttributeValue{}
 			attribute.SetDataType("String")
 			attribute.SetStringValue(value)
 
 			attributes[key] = attribute
 		}
-		
+
 		sendParams.MessageAttributes = attributes
 	}
 
